@@ -1,4 +1,4 @@
-# CPU Scheduling Algorithms Visualizer
+#  PyCPUSchedVis
 
 A Python tool for visualizing various CPU scheduling algorithms with Gantt charts.
 
