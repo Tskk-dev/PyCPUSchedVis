@@ -69,33 +69,42 @@ class CPUScheduler:
         return gantt, waiting_times, turnaround_times
     
     def npp(self):
-        """Non-Preemptive Priority"""
+        """Non-Preemptive Priority Scheduling (Fixed)"""
         processes = [p.copy() for p in self.processes]
+        # Add index to preserve original order
+        for i, p in enumerate(processes):
+            p['_index'] = i
+            
         gantt = []
         current_time = 0
         waiting_times = {}
         turnaround_times = {}
-        completed = []
-        
+        completed = set()
+
+        # Continue until all processes are done
         while len(completed) < len(processes):
+            # Find all processes that have arrived
             available = [p for p in processes if p['arrival'] <= current_time and p['pid'] not in completed]
-            
-            if not available:
-                current_time = min([p['arrival'] for p in processes if p['pid'] not in completed])
-                continue
-            
+
           
-            selected = min(available, key=lambda x: (x.get('priority', 99), x['pid']))
-            
+            if not available:
+                next_arrival = min([p['arrival'] for p in processes if p['pid'] not in completed])
+                current_time = next_arrival
+                continue
+
+            selected = min(available, key=lambda x: (x.get('priority', 99), x['arrival'], x['_index']))
+
             start_time = current_time
-            end_time = current_time + selected['burst']
+            end_time = start_time + selected['burst']
             gantt.append({'pid': selected['pid'], 'start': start_time, 'end': end_time})
-            
+
+       
             waiting_times[selected['pid']] = start_time - selected['arrival']
             turnaround_times[selected['pid']] = end_time - selected['arrival']
+
             current_time = end_time
-            completed.append(selected['pid'])
-        
+            completed.add(selected['pid'])
+
         return gantt, waiting_times, turnaround_times
     
     def pp(self):
